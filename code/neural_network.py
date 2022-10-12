@@ -5,7 +5,6 @@ Created on Sat Aug  6 16:23:49 2022
 @author: Yue
 """
 
-import torch
 from torch import nn
 
 
@@ -15,7 +14,7 @@ class MLP(nn.Module):
         # self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(12, 256),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(256, 1),
             # nn.ReLU()
         )
@@ -33,5 +32,5 @@ def reset_weights(m):
   """
     for layer in m.children():
         if hasattr(layer, "reset_parameters"):
-            print(f"Reset trainable parameters of layer = {layer}")
+            #print(f"Reset trainable parameters of layer = {layer}")
             layer.reset_parameters()
