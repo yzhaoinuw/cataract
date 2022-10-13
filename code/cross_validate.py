@@ -32,7 +32,7 @@ y = df_label.values
 #%%
 
 def cross_validate(
-    folds=5,
+    folds=6,
     epochs=50,
     save_model=False,
     model_name=None,
@@ -52,7 +52,7 @@ def cross_validate(
     cv_losses = []
     kf = KFold(n_splits=folds)
     for i, (train_index, test_index) in enumerate(kf.split(X), 1):
-        logging.info("Fold %s", i)
+        logging.info("Fold {}".format(i))
         logging.info("TRAIN: {}. TEST: {}".format(', '.join(map(str, train_index)), ', '.join(map(str, test_index))))
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
@@ -63,17 +63,18 @@ def cross_validate(
         y_test = torch.from_numpy(y_test).float()
     
         # Initialize the MLP
-        mlp = MLP().to(device)
+        mlp = MLP(input_size=X_train.shape[1]).to(device)
         mlp.apply(reset_weights)
     
         # Define the loss function and optimizer
-        loss_function = nn.L1Loss()
+        loss_function = nn.MSELoss()
+        loss_function_test = nn.L1Loss()
         optimizer = torch.optim.Adam(mlp.parameters(), lr=1e-4)
         train_losses = []
         test_losses = []
     
-        for epoch in range(epochs):
-            logging.debug("Starting epoch %s", epoch+1)
+        for epoch in range(1, epochs+1):
+            logging.debug("Starting epoch {}".format(epoch))
     
             # Get and prepare inputs
             X_train, y_train = X_train.to(device), y_train.to(device)
@@ -96,22 +97,24 @@ def cross_validate(
             # Print statistics
             train_loss = loss.item() / len(X_train)
     
-            logging.debug("training loss: %s", train_loss)
+            logging.debug("training loss: {}.".format(train_loss))
             train_losses.append(train_loss)
     
             with torch.no_grad():
                 X_test, y_test = X_test.to(device), y_test.to(device)
                 y_pred = mlp(X_test)
-                loss = loss_function(y_pred, y_test)
+                loss = loss_function_test(y_pred, y_test)
                 test_loss = loss.item() / len(X_test)
                 test_losses.append(test_loss)
-                logging.debug("test loss: %s", test_loss)
+                logging.debug("test loss: {}.".format(test_loss))
                 logging.debug("")
         min_test_loss = np.array(test_losses).min()
-        logging.info("min test loss: %s", min_test_loss)
+        min_test_loss_epoch = np.array(test_losses).argmin()
+        logging.info("min train loss: {}.".format(train_loss))
+        logging.info("min test loss: {} at epoch {}.".format(min_test_loss, min_test_loss_epoch))
         logging.info("")
         cv_losses.append(min_test_loss)
-    logging.info("average test loss: %s", np.array(cv_losses).mean())
+    logging.info("average test loss: {}.".format(np.array(cv_losses).mean()))
     
 """     
     plt.figure(figsize=(10,5))

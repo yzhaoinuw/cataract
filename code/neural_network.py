@@ -9,13 +9,13 @@ from torch import nn
 
 
 class MLP(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size, h1=128):
         super(MLP, self).__init__()
         # self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(12, 256),
+            nn.Linear(input_size, h1),
             nn.LeakyReLU(),
-            nn.Linear(256, 1),
+            nn.Linear(h1, 1),
             # nn.ReLU()
         )
 
