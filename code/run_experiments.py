@@ -15,26 +15,36 @@ import matplotlib.pyplot as plt
 from experiment import Experiment
 
 
-def run_experiment(df_features,
-                   df_labels,
-                   runs=1000,
-                   epochs=200,
-                   h1=256,
-    ):
-    
+def run_experiment(
+    df_features,
+    df_labels,
+    runs=1000,
+    epochs=200,
+    h1=256,
+):
+
     sample_loss = np.zeros(len(df_labels))
     test_losses = []
+    baseline_losses = []
     for i in range(runs):
         if i % 100 == 0:
             print(f"experiment {i}.")
         exp = Experiment(df_features, df_labels, test_size=0.4, h1=h1, dropout=0)
-        train_losses = exp.run_train(epochs=epochs)
+        exp.run_train(epochs=epochs)
         test_loss = exp.run_test()
-        sample_loss += exp.get_test_sample_loss()
+        baseline_loss = exp.compute_baseline_loss()
+        baseline_losses.append(baseline_loss)
+        sample_loss += exp.compute_test_sample_loss()
         test_losses.append(test_loss)
-    
+
+    baseline_losses = np.array(baseline_losses)
     test_losses = np.array(test_losses)
-    return {"test_losses": test_losses, "sample_loss": sample_loss}
+    return {
+        "test_losses": test_losses,
+        "sample_loss": sample_loss,
+        "baseline_losses": baseline_losses,
+    }
+
 
 #%%
 DATA_PATH = "../data/"
@@ -45,36 +55,12 @@ df_features = pd.read_excel(DATA_PATH + feature_file)
 df_labels = pd.read_excel(DATA_PATH + label_file)
 
 # dropping columns
-#df_features = df_features.drop("EPP/LT", axis=1)
-#df_features = df_features[["EPP/LT", "ACD_pre (mm)"]]
+# df_features = df_features.drop("Age", axis=1)
+# df_features = df_features[["EPP/LT", "ACD_pre (mm)"]]
+losses = run_experiment(df_features, df_labels)
 
-# permuting values in a column
-#permute_col = "Age"
-feature_loss = defaultdict(list)
-for k in range(1000):
-    if k % 100 == 0:
-        print(f"experiment {k}.")
-    exp = Experiment(df_features, df_labels, test_size=0.4, dropout=0)
-    train_losses = exp.run_train(epochs=200)
-    test_loss = exp.run_test()
-    feature_loss["none"].append(test_loss)
-    
-    X_test = exp.X_test
-    for i in range(len(df_features.columns)):
-        r = torch.randperm(X_test.shape[0])
-        X = X_test.clone()
-        X[:, i] = X_test[r, i]
-        feature_test_loss = exp.run_test(X_test=X)
-        feature_loss[df_features.columns[i]].append(feature_test_loss) 
-
-for feature, losses in feature_loss.items():
-    losses = np.array(losses)
-    print (feature)
-    print (f"mean: {losses.mean()}")
-    print (f"std: {losses.std()}")
-    print ()
 #%%
-'''
+"""
 plt.figure(figsize=(10, 5))
 plt.bar([str(k) for k in range(1, len(df_labels)+1)], sample_loss/runs)
 plt.title(f"Average MAE per Sample (from {runs} runs)")
@@ -89,4 +75,4 @@ plt.ylabel("Average Loss")
 #plt.grid()
 #plt.legend()
 plt.show()
-'''
+"""

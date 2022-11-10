@@ -14,7 +14,9 @@ from neural_network import MLP
 
 
 class Experiment:
-    def __init__(self, df_features, df_labels, test_size=0.4, split_seed=None, h1=256, dropout=0):
+    def __init__(
+        self, df_features, df_labels, test_size=0.4, split_seed=None, h1=256, dropout=0
+    ):
         use_cuda = torch.cuda.is_available()
         self.data_size = len(df_labels)
         self.test_size = test_size
@@ -28,21 +30,24 @@ class Experiment:
 
     def _initialize(self, df_features, df_labels):
         X_train, X_test, y_train, y_test = train_test_split(
-            df_features, df_labels, test_size=self.test_size, random_state=self.split_seed
+            df_features,
+            df_labels,
+            test_size=self.test_size,
+            random_state=self.split_seed,
         )
 
         self.test_indices = X_test.index
-        X_train = torch.from_numpy(X_train.values).float()
-        y_train = torch.from_numpy(y_train.values).float()
+        self.X_train = torch.from_numpy(X_train.values).float()
+        self.y_train = torch.from_numpy(y_train.values).float()
         self.X_test = torch.from_numpy(X_test.values).float()
         self.y_test = torch.from_numpy(y_test.values).float()
-        self.train_set = Dataset(X_train, y_train)
-        self.input_size = X_train.shape[1]
+        train_set = Dataset(self.X_train, self.y_train)
+        input_size = self.X_train.shape[1]
         self.train_loader = torch.utils.data.DataLoader(
-            self.train_set, batch_size=4, shuffle=True
+            train_set, batch_size=4, shuffle=True
         )
         # Initialize the MLP
-        self.model = MLP(input_size=self.input_size, h1=self.h1, dropout=self.dropout).to(
+        self.model = MLP(input_size=input_size, h1=self.h1, dropout=self.dropout).to(
             self.device
         )
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
@@ -51,6 +56,7 @@ class Experiment:
         train_losses = []
         for epoch in range(1, epochs + 1):
             current_loss = 0.0
+            self.model.train()
             for i, data in enumerate(self.train_loader, 0):
                 # Get and prepare inputs
                 inputs, targets = data
@@ -73,8 +79,10 @@ class Experiment:
                 self.optimizer.step()
 
                 # Print statistics
-                current_loss += torch.mean(self.loss_function_plot(outputs, targets)).item()
- 
+                current_loss += torch.mean(
+                    self.loss_function_plot(outputs, targets)
+                ).item()
+
             train_losses.append(current_loss)
             if verbose:
                 if epoch % 10 == 0:
@@ -82,7 +90,7 @@ class Experiment:
                     print(f"training loss: {current_loss}")
                     print("")
         return train_losses
-    
+
     @torch.no_grad()
     def run_test(self, X_test=None, y_test=None, take_mean=True, verbose=False):
         if X_test is None:
@@ -91,7 +99,7 @@ class Experiment:
             y_test = self.y_test
         X_test = X_test.to(self.device)
         y_test = y_test.to(self.device)
-        
+        self.model.eval()
         y_pred = self.model(X_test)
         test_loss = self.loss_function_plot(y_pred, y_test).detach().cpu()
         if take_mean:
@@ -99,9 +107,18 @@ class Experiment:
         if verbose:
             print(f"test loss: {test_loss}")
         return test_loss
-        
-    def get_test_sample_loss(self):
+
+    def compute_test_sample_loss(self):
         test_sample_loss = torch.zeros(self.data_size)
         test_loss = self.run_test(take_mean=False)
         test_sample_loss[self.test_indices] += test_loss.squeeze()
         return test_sample_loss.numpy()
+
+    def compute_baseline_loss(self, take_mean=True):
+        baseline_pred = self.y_train.mean().repeat(self.y_test.shape).detach().cpu()
+        baseline_loss = (
+            self.loss_function_plot(baseline_pred, self.y_test).detach().cpu()
+        )
+        if take_mean:
+            baseline_loss = torch.mean(baseline_loss).item()
+        return baseline_loss

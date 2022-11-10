@@ -52,16 +52,20 @@ ax.set_xticklabels(feature_names)
 ax.set_yticks(np.arange(len(feature_names)))
 ax.set_yticklabels(feature_names)
 
-ax.xaxis.set_ticks_position('bottom')
+ax.xaxis.set_ticks_position("bottom")
 
 # Set ticks on both sides of axes on
 ax.tick_params(axis="x", bottom=True, top=False, labelbottom=True, labeltop=False)
 # Rotate and align bottom ticklabels
-plt.setp([tick.label1 for tick in ax.xaxis.get_major_ticks()], rotation=45,
-         ha="right", va="center", rotation_mode="anchor")
+plt.setp(
+    [tick.label1 for tick in ax.xaxis.get_major_ticks()],
+    rotation=45,
+    ha="right",
+    va="center",
+    rotation_mode="anchor",
+)
 ax.set_title("Eye Features Correlation")
-ax.tick_params(axis='both', labelsize=5)
-#fig.tight_layout()
-#plt.savefig(FIGURE_PATH+'eye_features_correlation.png', dpi=300, bbox_inches="tight")
+ax.tick_params(axis="both", labelsize=5)
+# fig.tight_layout()
+# plt.savefig(FIGURE_PATH+'eye_features_correlation.png', dpi=300, bbox_inches="tight")
 plt.show()
-

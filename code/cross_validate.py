@@ -33,7 +33,11 @@ y = df_label.values
 
 
 def cross_validate(
-    folds=6, epochs=50, save_model=False, model_name=None, verbose=False,
+    folds=6,
+    epochs=50,
+    save_model=False,
+    model_name=None,
+    verbose=False,
 ):
     logging.basicConfig()
     if verbose:
@@ -135,5 +139,7 @@ FOLDS = 5
 EPOCHS = 100
 SAVE_MODEL = False
 cross_validate(
-    folds=FOLDS, epochs=EPOCHS, save_model=SAVE_MODEL,
+    folds=FOLDS,
+    epochs=EPOCHS,
+    save_model=SAVE_MODEL,
 )
