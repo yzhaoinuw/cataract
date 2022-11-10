@@ -18,7 +18,7 @@ class Dataset(torch.utils.data.Dataset):
         self.y = y
 
     def __len__(self):
-        return len(self.X)
+        return len(self.y)
 
     def __getitem__(self, i):
         return self.X[i], self.y[i]

@@ -5,6 +5,7 @@ Created on Wed Oct 12 22:58:13 2022
 @author: Yue
 """
 
+import numpy as np
 import torch
 from torch import nn
 from sklearn.model_selection import train_test_split
@@ -15,7 +16,14 @@ from neural_network import MLP
 
 class Experiment:
     def __init__(
-        self, df_features, df_labels, test_size=0.4, split_seed=None, h1=256, dropout=0
+        self,
+        df_features,
+        df_labels,
+        test_size=0.4,
+        split_seed=None,
+        h1=256,
+        dropout=0,
+        epochs=50,
     ):
         use_cuda = torch.cuda.is_available()
         self.data_size = len(df_labels)
@@ -23,6 +31,7 @@ class Experiment:
         self.split_seed = split_seed
         self.h1 = h1
         self.dropout = dropout
+        self.epochs = epochs
         self.device = torch.device("cuda:0" if use_cuda else "cpu")
         self.loss_function = nn.MSELoss()
         self.loss_function_plot = nn.L1Loss(reduction="none")
@@ -41,23 +50,28 @@ class Experiment:
         self.y_train = torch.from_numpy(y_train.values).float()
         self.X_test = torch.from_numpy(X_test.values).float()
         self.y_test = torch.from_numpy(y_test.values).float()
-        train_set = Dataset(self.X_train, self.y_train)
         input_size = self.X_train.shape[1]
-        self.train_loader = torch.utils.data.DataLoader(
-            train_set, batch_size=4, shuffle=True
-        )
         # Initialize the MLP
         self.model = MLP(input_size=input_size, h1=self.h1, dropout=self.dropout).to(
             self.device
         )
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        self.train_losses = []
+        self.test_losses = []
 
-    def run_train(self, epochs=50, verbose=False):
-        train_losses = []
-        for epoch in range(1, epochs + 1):
+    def run_train(self, verbose=False, run_test=True, batch_size=4):
+        train_set = Dataset(self.X_train, self.y_train)
+        train_loader = torch.utils.data.DataLoader(
+            train_set, batch_size=batch_size, shuffle=True
+        )
+        self.train_losses = []
+        self.test_losses = []
+        for epoch in range(1, self.epochs + 1):
+            if run_test:
+                self.test_losses.append(self.run_test())
             current_loss = 0.0
             self.model.train()
-            for i, data in enumerate(self.train_loader, 0):
+            for i, data in enumerate(train_loader, 0):
                 # Get and prepare inputs
                 inputs, targets = data
                 # inputs, targets = inputs.float(), targets.float()
@@ -79,17 +93,17 @@ class Experiment:
                 self.optimizer.step()
 
                 # Print statistics
-                current_loss += torch.mean(
+                current_loss += torch.sum(
                     self.loss_function_plot(outputs, targets)
                 ).item()
 
-            train_losses.append(current_loss)
+            current_loss /= len(train_set)
+            self.train_losses.append(current_loss)
             if verbose:
                 if epoch % 10 == 0:
                     print(f"finished epoch {epoch}")
                     print(f"training loss: {current_loss}")
                     print("")
-        return train_losses
 
     @torch.no_grad()
     def run_test(self, X_test=None, y_test=None, take_mean=True, verbose=False):
@@ -107,6 +121,12 @@ class Experiment:
         if verbose:
             print(f"test loss: {test_loss}")
         return test_loss
+
+    def get_train_losses(self) -> np.ndarray:
+        return np.array(self.train_losses)
+
+    def get_test_losses(self) -> np.ndarray:
+        return np.array(self.test_losses)
 
     def compute_test_sample_loss(self):
         test_sample_loss = torch.zeros(self.data_size)
