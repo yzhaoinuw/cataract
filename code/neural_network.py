@@ -9,25 +9,30 @@ from torch import nn
 
 
 class MLP(nn.Module):
-    def __init__(self, input_size, h1=128, dropout=0.5):
+    def __init__(self, input_size, h1=128, dropout=0.5, batchnorm=False):
         super(MLP, self).__init__()
-        self.l1 = nn.Linear(input_size, h1)
-        self.relu = nn.LeakyReLU()
+        l1 = nn.Linear(input_size, h1)
+        relu = nn.LeakyReLU()
+        l1_bn = nn.BatchNorm1d(h1)
+        dropout = nn.Dropout(p=dropout)
+
+        layers = [l1, relu, dropout]
+        if batchnorm:
+            layers.append(l1_bn)
+
+        self.h1 = nn.Sequential(*layers)
         self.l2 = nn.Linear(h1, 1)
-        self.dropout = nn.Dropout(p=dropout)
+
+    def reset_weights(self):
+        """
+        Try resetting model weights to avoid
+        weight leakage.
+        """
+        for layer in self.children():
+            if hasattr(layer, "reset_parameters"):
+                # print(f"Reset trainable parameters of layer = {layer}")
+                layer.reset_parameters()
 
     def forward(self, x):
-        h1 = self.relu(self.dropout(self.l1(x)))
-        output = self.l2(h1)
+        output = self.l2(self.h1(x))
         return output
-
-
-def reset_weights(m):
-    """
-    Try resetting model weights to avoid
-    weight leakage.
-    """
-    for layer in m.children():
-        if hasattr(layer, "reset_parameters"):
-            # print(f"Reset trainable parameters of layer = {layer}")
-            layer.reset_parameters()

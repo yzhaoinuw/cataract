@@ -40,7 +40,7 @@ col_names = [
     "SphericalEquiv",
     "NumberOfDaysPostOpScan",
     "RAC",
-    "ELP",
+    "LP",
 ]
 df.columns = col_names
 

@@ -69,8 +69,8 @@ DATA_PATH = "../data/"
 # new data
 feature_file = "features_processed.xlsx"
 df_features = pd.read_excel(DATA_PATH + feature_file)
-df_labels = df_features["ELP"].to_frame()
-df_features = df_features.drop("ELP", axis=1)
+df_labels = df_features["LP"].to_frame()
+df_features = df_features.drop("LP", axis=1)
 
 # try some transformation
 df_labels = (df_labels - 4) * 1000

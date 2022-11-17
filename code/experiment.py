@@ -24,14 +24,16 @@ class Experiment:
         split_seed=None,
         h1=256,
         dropout=0,
-        epochs=50,
+        epochs=200,
         normalization=True,
+        batchnorm=False,
     ):
         use_cuda = torch.cuda.is_available()
         self.data_size = len(df_labels)
         self.test_size = test_size
         self.split_seed = split_seed
         self.normalization = normalization
+        self.batchnorm = batchnorm
         self.h1 = h1
         self.dropout = dropout
         self.epochs = epochs
@@ -61,9 +63,12 @@ class Experiment:
         self.y_test = torch.from_numpy(y_test).float()
         input_size = self.X_train.shape[1]
         # Initialize the MLP
-        self.model = MLP(input_size=input_size, h1=self.h1, dropout=self.dropout).to(
-            self.device
-        )
+        self.model = MLP(
+            input_size=input_size,
+            h1=self.h1,
+            dropout=self.dropout,
+            batchnorm=self.batchnorm,
+        ).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         self.train_losses = []
         self.test_losses = []
@@ -115,6 +120,7 @@ class Experiment:
 
     @torch.no_grad()
     def run_test(self, X_test=None, y_test=None, take_mean=True, verbose=False):
+        self.model.eval()
         if X_test is None:
             X_test = self.X_test
         if y_test is None:
