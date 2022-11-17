@@ -8,6 +8,7 @@ Created on Wed Oct 12 22:58:13 2022
 import numpy as np
 import torch
 from torch import nn
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 from dataset import Dataset
@@ -24,11 +25,13 @@ class Experiment:
         h1=256,
         dropout=0,
         epochs=50,
+        normalization=True,
     ):
         use_cuda = torch.cuda.is_available()
         self.data_size = len(df_labels)
         self.test_size = test_size
         self.split_seed = split_seed
+        self.normalization = normalization
         self.h1 = h1
         self.dropout = dropout
         self.epochs = epochs
@@ -38,18 +41,24 @@ class Experiment:
         self._initialize(df_features, df_labels)
 
     def _initialize(self, df_features, df_labels):
-        X_train, X_test, y_train, y_test = train_test_split(
+        df_X_train, df_X_test, df_y_train, df_y_test = train_test_split(
             df_features,
             df_labels,
             test_size=self.test_size,
             random_state=self.split_seed,
         )
+        self.test_indices = df_X_test.index
+        X_train, X_test = df_X_train.values, df_X_test.values
+        y_train, y_test = df_y_train.values, df_y_test.values
+        if self.normalization:
+            scaler_x = StandardScaler()
+            X_train = scaler_x.fit_transform(X_train)
+            X_test = scaler_x.transform(X_test)
 
-        self.test_indices = X_test.index
-        self.X_train = torch.from_numpy(X_train.values).float()
-        self.y_train = torch.from_numpy(y_train.values).float()
-        self.X_test = torch.from_numpy(X_test.values).float()
-        self.y_test = torch.from_numpy(y_test.values).float()
+        self.X_train = torch.from_numpy(X_train).float()
+        self.y_train = torch.from_numpy(y_train).float()
+        self.X_test = torch.from_numpy(X_test).float()
+        self.y_test = torch.from_numpy(y_test).float()
         input_size = self.X_train.shape[1]
         # Initialize the MLP
         self.model = MLP(input_size=input_size, h1=self.h1, dropout=self.dropout).to(
@@ -74,7 +83,6 @@ class Experiment:
             for i, data in enumerate(train_loader, 0):
                 # Get and prepare inputs
                 inputs, targets = data
-                # inputs, targets = inputs.float(), targets.float()
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
                 targets = targets.reshape((targets.shape[0], 1))
                 # Zero the gradients
