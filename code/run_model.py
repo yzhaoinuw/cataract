@@ -30,9 +30,10 @@ df_labels = df_features["LP"].to_frame()
 df_labels = (df_labels - 4) * 1
 #%%
 h1 = 256
-epochs = 200
+epochs = 100
 normalization = True
 batchnorm = False
+batch_size = 4
 
 exp = Experiment(
     df_features,
@@ -44,14 +45,14 @@ exp = Experiment(
     normalization=normalization,
     batchnorm=batchnorm,
 )
-exp.run_train()
+exp.run_train(batch_size=batch_size)
 
 #%%
 train_losses = exp.get_train_losses()
 test_losses = exp.get_test_losses()
 baseline_loss = exp.compute_baseline_loss()
 
-skip_epochs = 0
+skip_epochs = 20
 plt.title("Training and Test Loss")
 plt.plot(
     list(range(skip_epochs + 1, epochs + 1)), test_losses[skip_epochs:], label="test"
@@ -62,7 +63,8 @@ plt.plot(
 plt.axhline(y=baseline_loss, color="r", linestyle="-", label="baseline loss")
 plt.xlabel("iterations")
 plt.ylabel("Loss")
-# plt.ylim((0, 1))
+plt.xlim(skip_epochs, epochs)
+# plt.ylim((0, 0.2))
 plt.grid()
 plt.legend()
 plt.show()

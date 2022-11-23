@@ -23,6 +23,7 @@ def run_experiment(
     h1=256,
     normalization=True,
     batch_size=8,
+    batchnorm=False,
 ):
 
     sample_loss = np.zeros(len(df_labels))
@@ -39,6 +40,7 @@ def run_experiment(
             epochs=epochs,
             dropout=0,
             normalization=normalization,
+            batchnorm=batchnorm,
         )
         exp.run_train(batch_size=batch_size)
         baseline_loss = exp.compute_baseline_loss()
@@ -73,19 +75,21 @@ df_labels = df_features["LP"].to_frame()
 df_features = df_features.drop("LP", axis=1)
 
 # try some transformation
-df_labels = (df_labels - 4) * 1000
+df_labels = (df_labels - 4) * 1
 
 # dropping columns
 # df_features = df_features.drop("Age", axis=1)
 # df_features = df_features[["EPP/LT", "ACD_pre (mm)"]]
 runs = 1000
-EPOCHS = 200
+EPOCHS = 100
+hidden_size = 16
 batch_size = 8
-normalization = False
+normalization = True
 losses = run_experiment(
     df_features,
     df_labels,
     runs=runs,
+    h1=hidden_size,
     epochs=EPOCHS,
     normalization=normalization,
     batch_size=batch_size,
@@ -93,6 +97,13 @@ losses = run_experiment(
 
 #%%
 
+test_losses = losses["test_losses"]
+baseline_losses = losses["baseline_losses"]
+
+print(f"hidden_size: {hidden_size}")
+print(f"epochs: {EPOCHS}")
+print(f"test loss mean: {test_losses.mean()}")
+print(f"test loss std: {test_losses.std()}")
 """
 train_losses = losses["train_losses"]
 test_losses = losses["test_losses"]

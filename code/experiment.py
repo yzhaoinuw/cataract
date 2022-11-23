@@ -22,9 +22,9 @@ class Experiment:
         df_labels,
         test_size=0.4,
         split_seed=None,
-        h1=256,
+        h1=64,
         dropout=0,
-        epochs=200,
+        epochs=50,
         normalization=True,
         batchnorm=False,
     ):
@@ -149,7 +149,9 @@ class Experiment:
         return test_sample_loss.numpy()
 
     def compute_baseline_loss(self, take_mean=True):
-        baseline_pred = self.y_train.mean().repeat(self.y_test.shape).detach().cpu()
+        baseline_pred = (
+            torch.mean(self.y_train).repeat(self.y_test.shape).detach().cpu()
+        )
         baseline_loss = (
             self.loss_function_plot(baseline_pred, self.y_test).detach().cpu()
         )
