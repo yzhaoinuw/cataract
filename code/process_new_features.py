@@ -7,40 +7,65 @@ Created on Wed Nov 16 21:40:37 2022
 add headers to Edu's new features table
 """
 
-import torch
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import OneHotEncoder
 
-# from sklearn.preprocessing import StandardScaler
-# from sklearn.model_selection import train_test_split
-
-from experiment import Experiment
-
 
 DATA_PATH = "../data/"
-feature_file = "features_new.xlsx"
+feature_file = "features_dec.xlsx"
 
 df = pd.read_excel(DATA_PATH + feature_file, header=None)
 col_names = [
-    "Sex",
+    "Sex",  # 1
     "Laterality",
     "AgeAtTimeOfOperationyear",
     "IOLModel",
-    "IOLPowerInsertedD",
+    "IOLPowerInsertedD",  # 5
     "AxialLengthmm",
     "PreopK1",
     "PreopK1Axis",
     "PreopK2",
-    "PreopK2Axis",
+    "PreopK2Axis",  # 10
     "Sphere",
     "Cyl",
     "SphericalEquiv",
     "NumberOfDaysPostOpScan",
+    "PupilSize",  # 15
     "RAC",
-    "LP",
+    "CT",
+    "ACD",
+    "LT",
+    "VCD",  # 20
+    "AL",
+    "ALNotCorrected",
+    "StdALNonCorrectedEyes",
+    "MedRACEyes",
+    "MedRPCEyes",  # 25
+    "MedRALEyes",
+    "MedRPLEyes",
+    "MedRACEyesDiam2",
+    "MedRPCEyesDiam2",
+    "MedRALEyesDiam2",  # 30
+    "MedRPLEyesDiam2",
+    "RAC3D",
+    "RPC3D",
+    "RAL3D",
+    "RPL3D",  # 35
+    "RAC3DDiam2",
+    "RPC3DDiam2",
+    "RAL3DDiam2",
+    "RPL3DDiam2",
+    "CTPostEyes",  # 40
+    "IOLTEyes",
+    "VCDPostEyes",
+    "ALPostEyes",
+    "ALNonCorrectedPostEyes",
+    "LP",  # 45
+    "ALPost",
+    "SpherePost",
+    "CylinderPost",
+    "SphericalEquivPost",
 ]
 df.columns = col_names
 
@@ -66,5 +91,5 @@ df_new = pd.concat(
 )
 
 #%%
-SAVE_PATH = DATA_PATH + "features_processed.xlsx"
-# df_new.to_excel(SAVE_PATH, index=False)
+SAVE_PATH = DATA_PATH + "features_processed_dec.xlsx"
+df_new.to_excel(SAVE_PATH, index=False)

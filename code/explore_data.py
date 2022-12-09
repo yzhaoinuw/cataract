@@ -16,19 +16,25 @@ DATA_PATH = "../data/"
 FIGURE_PATH = "../figure/"
 feature_file = "Tables_1_2_data.xlsx"
 label_file = "label.xlsx"
+feature_file = "features_processed.xlsx"
 
+# df_features = pd.read_excel(DATA_PATH + feature_file)
+# df_label = pd.read_excel(DATA_PATH + label_file)
+
+# new data
 df_features = pd.read_excel(DATA_PATH + feature_file)
-df_label = pd.read_excel(DATA_PATH + label_file)
-
+df_labels = df_features["LP"].to_frame()
+df_features = df_features.drop("LP", axis=1)
 # df_features = df_features.drop("EPP/LT", axis=1)
 
-X = df_features.values
-y = df_label.values
 #%%
+"""
 # replicate Edu's work
+X = df_features.values
+y = df_labels.values
 y_pred = 8.497 * df_features["EPP/LT"] + 0.25 * df_features["ACD_pre (mm)"]
-mae = abs(y_pred - df_label["LP"]).mean()
-me = (y_pred - df_label["LP"]).mean()
+mae = abs(y_pred - df_labels["LP"]).mean()
+me = (y_pred - df_labels["LP"]).mean()
 
 #%%
 pca = PCA(n_components=2)
@@ -69,3 +75,4 @@ ax.tick_params(axis="both", labelsize=5)
 # fig.tight_layout()
 # plt.savefig(FIGURE_PATH+'eye_features_correlation.png', dpi=300, bbox_inches="tight")
 plt.show()
+"""

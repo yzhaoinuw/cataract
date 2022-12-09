@@ -70,28 +70,53 @@ if __name__ == "__main__":
     # df_labels = pd.read_excel(DATA_PATH + label_file)
 
     # new data
-    feature_file = "features_processed.xlsx"
+    feature_file = "features_processed_dec.xlsx"
     df_features = pd.read_excel(DATA_PATH + feature_file)
-    df_labels = df_features["LP"].to_frame()
-    df_features = df_features.drop("LP", axis=1)
 
     # drop features
-    df_features = df_features.drop("IOLPowerInsertedD", axis=1)
+    # df_features = df_features.drop("IOLPowerInsertedD", axis=1)
 
     # select subset of features
     use_features = [
         "AxialLengthmm",
         "RAC",
-        "Sex_1",
-        "Sex_2",
         "IOLModel_1",
         "IOLModel_2",
         "IOLModel_3",
+        "Sex_1",
+        "Sex_2",
+        # Axial measurements, col 17 - 20
+        "CT",
+        "ACD",
+        "LT",
+        "VCD",
+        # new AL
+        "AL",
+        # crystalline lens params, set I, col 26-27
+        # "MedRALEyes",
+        # "MedRPLEyes",
+        # crystalline lens params, set II, col 30-31
+        # "MedRALEyesDiam2",
+        # "MedRPLEyesDiam2",
+        # crystalline lens params, set III, col 34-35
+        # "RAL3D",
+        # "RPL3D",
+        # crystalline lens params, set IV, col 38-39
+        # "RAL3DDiam2",
+        # "RPL3DDiam2",
+        # additional features
+        "PupilSize",
+        # LP
+        "LP",
     ]
 
     # Edu's benchmark
     # use_features = ["RAC", "AxialLengthmm", "IOLModel_1", "IOLModel_2", "IOLModel_3"]
     df_features = df_features[use_features]
+    # df_features = df_features[df_features["IOLModel_1"] == 1]
+    # df_features = df_features.drop("IOLModel_1", axis=1)
+    df_labels = df_features["LP"].to_frame()
+    df_features = df_features.drop("LP", axis=1)
 
     # try some transformation
     df_labels = (df_labels - 4) * 1
