@@ -18,22 +18,58 @@ from experiment import Experiment
 
 
 DATA_PATH = "../data/"
-feature_file = "Tables_1_2_data.xlsx"
 label_file = "label.xlsx"
-feature_file = "features_processed.xlsx"
+feature_file = "features_processed_dec.xlsx"
 
-# df_features = pd.read_excel(DATA_PATH + feature_file)
 # df_labels = pd.read_excel(DATA_PATH + label_file)
 df_features = pd.read_excel(DATA_PATH + feature_file)
+
+use_features = [
+    "AxialLengthmm",
+    "RAC",
+    "IOLModel_1",
+    "IOLModel_2",
+    "IOLModel_3",
+    "Sex_1",
+    "Sex_2",
+    # Axial measurements, col 17 - 20
+    # "CT",
+    # "ACD",
+    # "LT",
+    # "VCD",
+    # new AL
+    # "AL",
+    # crystalline lens params, set I, col 26-27
+    # "MedRALEyes",
+    # "MedRPLEyes",
+    # crystalline lens params, set II, col 30-31
+    # "MedRALEyesDiam2",
+    # "MedRPLEyesDiam2",
+    # crystalline lens params, set III, col 34-35
+    # "RAL3D",
+    # "RPL3D",
+    # crystalline lens params, set IV, col 38-39
+    # "RAL3DDiam2",
+    # "RPL3DDiam2",
+    # additional features
+    # "PupilSize",
+    # LP
+    "LP",
+]
+
+df_features = df_features[use_features]
 df_labels = df_features["LP"].to_frame()
-# transform LP
+df_features = df_features.drop("LP", axis=1)
+
+# try some transformation
 df_labels = (df_labels - 4) * 1
+
 #%%
-h1 = 256
-epochs = 100
+h1 = 32
+epochs = 50
 normalization = True
 batchnorm = False
-batch_size = 4
+batch_size = 8
 
 exp = Experiment(
     df_features,
@@ -51,6 +87,7 @@ exp.run_train(batch_size=batch_size)
 train_losses = exp.get_train_losses()
 test_losses = exp.get_test_losses()
 baseline_loss = exp.compute_baseline_loss()
+sample_loss = exp.compute_test_sample_loss()
 
 skip_epochs = 20
 plt.title("Training and Test Loss")

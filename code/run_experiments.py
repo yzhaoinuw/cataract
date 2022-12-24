@@ -28,6 +28,7 @@ def run_experiment(
 
     sample_loss = np.zeros(len(df_labels))
     test_losses = []
+    test_sample_losses = []
     baseline_losses = []
     for i in range(runs):
         if i % 100 == 0:
@@ -48,14 +49,17 @@ def run_experiment(
         # sample_loss += exp.compute_test_sample_loss()
         # train_losses = exp.get_train_losses()
         test_losses.append(exp.get_test_losses()[-1])
+        test_sample_losses.append(exp.run_test(take_mean=False))
 
     baseline_losses = np.array(baseline_losses)
     test_losses = np.array(test_losses)
+    test_sample_losses = np.array(test_sample_losses)
     return {
         # "train_losses": train_losses,
         "test_losses": test_losses,
-        "sample_loss": sample_loss,
+        # "sample_loss": sample_loss,
         "baseline_losses": baseline_losses,
+        "test_sample_losses": test_sample_losses,
     }
 
 
@@ -78,13 +82,13 @@ if __name__ == "__main__":
 
     # select subset of features
     use_features = [
-        "AxialLengthmm",
+        # "AxialLengthmm",
         "RAC",
         "IOLModel_1",
         "IOLModel_2",
         "IOLModel_3",
-        "Sex_1",
-        "Sex_2",
+        # "Sex_1",
+        # "Sex_2",
         # Axial measurements, col 17 - 20
         "CT",
         "ACD",
@@ -105,7 +109,7 @@ if __name__ == "__main__":
         # "RAL3DDiam2",
         # "RPL3DDiam2",
         # additional features
-        "PupilSize",
+        # "PupilSize",
         # LP
         "LP",
     ]
@@ -143,7 +147,8 @@ if __name__ == "__main__":
 
     test_losses = losses["test_losses"]
     baseline_losses = losses["baseline_losses"]
-
+    # sample_loss = losses["sample_loss"]
+    test_sample_losses = losses["test_sample_losses"]
     print(f"hidden_size: {hidden_size}")
     print(f"epochs: {EPOCHS}")
     print(f"test loss mean: {test_losses.mean()}")

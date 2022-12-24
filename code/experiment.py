@@ -129,9 +129,11 @@ class Experiment:
         y_test = y_test.to(self.device)
         self.model.eval()
         y_pred = self.model(X_test)
-        test_loss = self.loss_function_plot(y_pred, y_test).detach().cpu()
+        test_loss = (
+            self.loss_function_plot(y_pred, y_test).detach().cpu().numpy().squeeze()
+        )
         if take_mean:
-            test_loss = torch.mean(test_loss).item()
+            test_loss = np.mean(test_loss).item()
         if verbose:
             print(f"test loss: {test_loss}")
         return test_loss
@@ -143,10 +145,10 @@ class Experiment:
         return np.array(self.test_losses)
 
     def compute_test_sample_loss(self):
-        test_sample_loss = torch.zeros(self.data_size)
+        test_sample_loss = np.zeros(self.data_size)
         test_loss = self.run_test(take_mean=False)
-        test_sample_loss[self.test_indices] += test_loss.squeeze()
-        return test_sample_loss.numpy()
+        test_sample_loss[self.test_indices] += test_loss
+        return test_sample_loss
 
     def compute_baseline_loss(self, take_mean=True):
         baseline_pred = (

@@ -9,24 +9,48 @@ Created on Wed Oct 12 14:53:52 2022
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 
+from sklearn.decomposition import PCA
+from sklearn.linear_model import Ridge
 
 DATA_PATH = "../data/"
 FIGURE_PATH = "../figure/"
 feature_file = "Tables_1_2_data.xlsx"
 label_file = "label.xlsx"
 feature_file = "features_processed.xlsx"
+feature_file = "features_processed_dec.xlsx"
 
 # df_features = pd.read_excel(DATA_PATH + feature_file)
 # df_label = pd.read_excel(DATA_PATH + label_file)
 
 # new data
 df_features = pd.read_excel(DATA_PATH + feature_file)
+df_features = df_features.dropna()
+# df_features = df_features[df_features["IOLModel_1"] == 1]
+# df_features = df_features.drop("IOLModel_1", axis=1)
 df_labels = df_features["LP"].to_frame()
 df_features = df_features.drop("LP", axis=1)
-# df_features = df_features.drop("EPP/LT", axis=1)
 
+# try some transformation
+# df_labels = (df_labels - 4) * 1
+
+#%%
+
+X = df_features
+y = df_labels.values.flatten()
+# PCA
+# pca = PCA(n_components=5)
+# pca.fit(df_features.values)
+
+model = Ridge()
+model.fit(X, y)
+
+coefs = pd.DataFrame(model.coef_, columns=["Coefficients"], index=df_features.columns)
+
+coefs.plot(kind="barh", figsize=(9, 7))
+plt.title("Ridge model")
+plt.axvline(x=0, color=".5")
+plt.subplots_adjust(left=0.3)
 #%%
 """
 # replicate Edu's work
@@ -35,10 +59,6 @@ y = df_labels.values
 y_pred = 8.497 * df_features["EPP/LT"] + 0.25 * df_features["ACD_pre (mm)"]
 mae = abs(y_pred - df_labels["LP"]).mean()
 me = (y_pred - df_labels["LP"]).mean()
-
-#%%
-pca = PCA(n_components=2)
-pca.fit(df_features)
 
 #%%
 df_features["ELP"] = y
