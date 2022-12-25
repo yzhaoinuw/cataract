@@ -26,7 +26,7 @@ def run_experiment(
     batchnorm=False,
 ):
 
-    sample_loss = np.zeros(len(df_labels))
+    sample_loss = []
     test_losses = []
     test_sample_losses = []
     baseline_losses = []
@@ -46,20 +46,20 @@ def run_experiment(
         exp.run_train(batch_size=batch_size)
         baseline_loss = exp.compute_baseline_loss()
         baseline_losses.append(baseline_loss)
-        # sample_loss += exp.compute_test_sample_loss()
+        sample_loss.append(exp.compute_test_sample_loss())
         # train_losses = exp.get_train_losses()
         test_losses.append(exp.get_test_losses()[-1])
-        test_sample_losses.append(exp.run_test(take_mean=False))
+        # test_sample_losses.append(exp.run_test(take_mean=False))
 
     baseline_losses = np.array(baseline_losses)
     test_losses = np.array(test_losses)
-    test_sample_losses = np.array(test_sample_losses)
+    # test_sample_losses = np.array(test_sample_losses)
     return {
         # "train_losses": train_losses,
         "test_losses": test_losses,
-        # "sample_loss": sample_loss,
+        "sample_loss": sample_loss,
         "baseline_losses": baseline_losses,
-        "test_sample_losses": test_sample_losses,
+        # "test_sample_losses": test_sample_losses,
     }
 
 
@@ -147,9 +147,17 @@ if __name__ == "__main__":
 
     test_losses = losses["test_losses"]
     baseline_losses = losses["baseline_losses"]
-    # sample_loss = losses["sample_loss"]
-    test_sample_losses = losses["test_sample_losses"]
+    sample_loss = losses["sample_loss"]
+    # test_sample_losses = losses["test_sample_losses"]
     print(f"hidden_size: {hidden_size}")
     print(f"epochs: {EPOCHS}")
     print(f"test loss mean: {test_losses.mean()}")
     print(f"test loss std: {test_losses.std()}")
+
+#%%
+"""
+SAVE_LOC = "../results/"
+df_mae = pd.DataFrame(sample_loss, columns=list(range(1, len(sample_loss[0])+1)))
+df_mae.index = np.arange(1, len(df_mae) + 1)
+df_mae.to_excel(SAVE_LOC+"MAE_RAC+new_AL+IOL_Model+Axial_Measurements.xlsx", index=False)
+"""
