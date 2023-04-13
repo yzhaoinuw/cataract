@@ -5,11 +5,12 @@ Created on Sat Aug  6 16:23:49 2022
 @author: Yue
 """
 
+import torch
 from torch import nn
 
 
 class MLP(nn.Module):
-    def __init__(self, input_size, h1=128, dropout=0.5, batchnorm=False):
+    def __init__(self, input_size, h1=32, dropout=0, batchnorm=False):
         super(MLP, self).__init__()
         l1 = nn.Linear(input_size, h1)
         relu = nn.LeakyReLU()
@@ -36,3 +37,12 @@ class MLP(nn.Module):
     def forward(self, x):
         output = self.l2(self.h1(x))
         return output
+    
+class Linear(nn.Module):
+    def __init__(self, input_size):
+        super(Linear, self).__init__()
+        self.l1 = nn.Linear(input_size, 1)
+        self.intercept = nn.Parameter(torch.rand(1))
+    
+    def forward(self, x):
+        return self.l1(x)

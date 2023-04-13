@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 from dataset import Dataset
-from neural_network import MLP
+from neural_network import MLP, Linear
 
 
 class Experiment:
@@ -22,6 +22,7 @@ class Experiment:
         df_labels,
         test_size=0.4,
         split_seed=None,
+        model="mlp",
         h1=64,
         dropout=0,
         epochs=50,
@@ -40,9 +41,9 @@ class Experiment:
         self.device = torch.device("cuda:0" if use_cuda else "cpu")
         self.loss_function = nn.MSELoss()
         self.loss_function_plot = nn.L1Loss(reduction="none")
-        self._initialize(df_features, df_labels)
+        self._initialize(df_features, df_labels, model)
 
-    def _initialize(self, df_features, df_labels):
+    def _initialize(self, df_features, df_labels, model):
         df_X_train, df_X_test, df_y_train, df_y_test = train_test_split(
             df_features,
             df_labels,
@@ -62,14 +63,19 @@ class Experiment:
         self.X_test = torch.from_numpy(X_test).float()
         self.y_test = torch.from_numpy(y_test).float()
         input_size = self.X_train.shape[1]
-        # Initialize the MLP
-        self.model = MLP(
-            input_size=input_size,
-            h1=self.h1,
-            dropout=self.dropout,
-            batchnorm=self.batchnorm,
-        ).to(self.device)
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        
+        # Initialize the model
+        if model == "mlp":
+            self.model = MLP(
+                input_size=input_size,
+                h1=self.h1,
+                dropout=self.dropout,
+                batchnorm=self.batchnorm,
+            ).to(self.device)
+            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)    
+        elif model == "linear":
+            self.model = Linear(input_size=input_size).to(self.device)
+            self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, weight_decay=1)
         self.train_losses = []
         self.test_losses = []
 

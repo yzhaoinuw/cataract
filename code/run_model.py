@@ -25,20 +25,20 @@ feature_file = "features_processed_dec.xlsx"
 df_features = pd.read_excel(DATA_PATH + feature_file)
 
 use_features = [
-    "AxialLengthmm",
+    #"AxialLengthmm",
     "RAC",
     "IOLModel_1",
     "IOLModel_2",
     "IOLModel_3",
-    "Sex_1",
-    "Sex_2",
+    #"Sex_1",
+    #"Sex_2",
     # Axial measurements, col 17 - 20
-    # "CT",
-    # "ACD",
-    # "LT",
-    # "VCD",
+    "CT",
+    "ACD",
+    "LT",
+    "VCD",
     # new AL
-    # "AL",
+    "AL",
     # crystalline lens params, set I, col 26-27
     # "MedRALEyes",
     # "MedRPLEyes",
@@ -65,16 +65,17 @@ df_features = df_features.drop("LP", axis=1)
 df_labels = (df_labels - 4) * 1
 
 #%%
-h1 = 32
-epochs = 50
+h1 = 1
+epochs = 100
 normalization = True
 batchnorm = False
-batch_size = 8
+batch_size = 64
 
 exp = Experiment(
     df_features,
     df_labels,
     test_size=0.4,
+    model="mlp",
     h1=h1,
     epochs=epochs,
     dropout=0,

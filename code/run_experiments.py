@@ -19,8 +19,9 @@ def run_experiment(
     df_features,
     df_labels,
     runs=1000,
+    model="mlp",
     epochs=200,
-    h1=256,
+    h1=32,
     normalization=True,
     batch_size=8,
     batchnorm=False,
@@ -36,7 +37,8 @@ def run_experiment(
         exp = Experiment(
             df_features,
             df_labels,
-            test_size=0.4,
+            test_size=0.1,
+            model=model,
             h1=h1,
             epochs=epochs,
             dropout=0,
@@ -74,7 +76,7 @@ if __name__ == "__main__":
     # df_labels = pd.read_excel(DATA_PATH + label_file)
 
     # new data
-    feature_file = "features_processed_dec.xlsx"
+    feature_file = "features_processed_feb.xlsx"
     df_features = pd.read_excel(DATA_PATH + feature_file)
 
     # drop features
@@ -82,7 +84,7 @@ if __name__ == "__main__":
 
     # select subset of features
     use_features = [
-        # "AxialLengthmm",
+        #"AxialLengthmm",
         "RAC",
         "IOLModel_1",
         "IOLModel_2",
@@ -129,6 +131,7 @@ if __name__ == "__main__":
     # df_features = df_features.drop("Age", axis=1)
     # df_features = df_features[["EPP/LT", "ACD_pre (mm)"]]
     runs = 1000
+    model = "mlp"
     EPOCHS = 50
     hidden_size = 32
     batch_size = 8
@@ -137,6 +140,7 @@ if __name__ == "__main__":
         df_features,
         df_labels,
         runs=runs,
+        model=model,
         h1=hidden_size,
         epochs=EPOCHS,
         normalization=normalization,
@@ -155,9 +159,9 @@ if __name__ == "__main__":
     print(f"test loss std: {test_losses.std()}")
 
 #%%
-"""
+'''
 SAVE_LOC = "../results/"
 df_mae = pd.DataFrame(sample_loss, columns=list(range(1, len(sample_loss[0])+1)))
 df_mae.index = np.arange(1, len(df_mae) + 1)
-df_mae.to_excel(SAVE_LOC+"MAE_RAC+new_AL+IOL_Model+Axial_Measurements.xlsx", index=False)
-"""
+df_mae.to_excel(SAVE_LOC+"MAE_RAC+old_AL+IOL_Model.xlsx", index=False)
+'''

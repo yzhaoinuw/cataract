@@ -15,6 +15,7 @@ df = pd.read_excel(RESULTS_PATH + data_file)
 #%%
 sample_count = df.astype(bool).sum(axis=0)
 mae_mean = df.mean(axis=0)
+mae_mean = df.sum(axis=0)/sample_count
 
 ax = mae_mean.plot(
     lw=2,
@@ -23,5 +24,6 @@ ax = mae_mean.plot(
     markersize=10,
     title="Mean MAE over 1000 Experiments per Eye",
 )
+ax.grid(True)
 ax.set_xlabel("Eye ID")
 ax.set_ylabel("Mean MAE")

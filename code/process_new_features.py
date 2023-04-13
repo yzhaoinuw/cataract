@@ -13,7 +13,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 
 DATA_PATH = "../data/"
-feature_file = "features_dec.xlsx"
+feature_file = "Features7.xlsx"
 
 df = pd.read_excel(DATA_PATH + feature_file, header=None)
 col_names = [
@@ -68,28 +68,27 @@ col_names = [
     "SphericalEquivPost",
 ]
 df.columns = col_names
-
 cat_cols = ["Sex", "Laterality", "IOLModel"]
+df = df.dropna(subset=cat_cols)
+df = df.astype({"IOLModel": int})
 for col in cat_cols:
     df[col] = df[col].astype(str)
 
 #%%
 enc = OneHotEncoder()
 df_cat = df.select_dtypes("object")
-
 enc.fit(df_cat)
-
 codes = enc.transform(df_cat).toarray()
 feature_names = enc.get_feature_names_out(cat_cols)
 
 df_new = pd.concat(
     [
         df.select_dtypes(exclude="object"),
-        pd.DataFrame(codes, columns=feature_names).astype(int),
+        pd.DataFrame(codes, columns=feature_names, index=df.index).astype(int),
     ],
     axis=1,
 )
 
 #%%
-SAVE_PATH = DATA_PATH + "features_processed_dec.xlsx"
-# df_new.to_excel(SAVE_PATH, index=False)
+SAVE_PATH = DATA_PATH + "features7_processed.xlsx"
+df_new.to_excel(SAVE_PATH, index=False)
